@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { authRoute } from "./routes/authRoute";
-
+//for development
 const PORT = Number(process.env.PORT ?? 3000);
 
 export const app = new Elysia()
