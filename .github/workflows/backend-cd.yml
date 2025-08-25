@@ -11,14 +11,29 @@ jobs:
     permissions:
       contents: read
       packages: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Bun
+      # Try setup-bun action first
+      - name: Setup Bun (pinned)
+        id: bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.x
+          bun-version: 1.1.34
+        continue-on-error: true
+
+      # Fallback if action 400s
+      - name: Fallback install Bun (curl)
+        if: steps.bun.outcome != 'success'
+        run: |
+          echo "setup-bun failed, using curl installer..."
+          curl -fsSL https://bun.sh/install | bash -s -- bun-v1.1.34
+          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+
+      - name: Verify Bun
+        run: bun --version
 
       - name: Install deps
         run: bun install --frozen-lockfile
@@ -26,7 +41,7 @@ jobs:
       - name: Generate Prisma Client
         run: bunx prisma generate
 
-      # If you have unit tests, enable:
+      # If you have tests, run them
       - name: Run tests
         run: bun test --bail --coverage || true
 
